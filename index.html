@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thuisinventaris — vind alles terug</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗃️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Zijbalk -->
+  <nav class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">⌂</span>
+      <div class="brand-text">
+        <strong>Thuisinventaris</strong>
+        <span>weet altijd waar het ligt</span>
+      </div>
+    </div>
+
+    <button class="nav-item is-active" data-view="dashboard">
+      <span class="nav-ico">▤</span> Overzicht
+    </button>
+    <button class="nav-item" data-view="locaties">
+      <span class="nav-ico">▢</span> Locaties
+    </button>
+    <button class="nav-item" data-view="spullen">
+      <span class="nav-ico">◇</span> Spullen
+    </button>
+    <button class="nav-item" data-view="zoeken">
+      <span class="nav-ico">⌕</span> Zoeken
+    </button>
+    <button class="nav-item" data-view="scannen">
+      <span class="nav-ico">▣</span> QR scannen
+    </button>
+    <button class="nav-item" data-view="uitleen">
+      <span class="nav-ico">↷</span> Uitleen
+    </button>
+    <button class="nav-item" data-view="instellingen">
+      <span class="nav-ico">⚙</span> Instellingen
+    </button>
+
+    <div class="sidebar-foot">
+      <button id="btn-nieuw-item" class="btn btn-accent btn-block">+ Nieuw voorwerp</button>
+    </div>
+  </nav>
+
+  <!-- Hoofdinhoud -->
+  <main class="content">
+    <header class="topbar">
+      <h1 id="view-title">Overzicht</h1>
+      <div class="topbar-search">
+        <input id="quick-search" type="search" placeholder="Snel zoeken op naam of label…" autocomplete="off">
+      </div>
+    </header>
+
+    <div id="view-root" class="view-root"><!-- render targets --></div>
+  </main>
+</div>
+
+<!-- Modal: locatie toevoegen/bewerken -->
+<div id="modal-locatie" class="modal-backdrop hidden">
+  <div class="modal">
+    <h2 id="modal-locatie-titel">Nieuwe locatie</h2>
+    <form id="form-locatie">
+      <label>Naam
+        <input type="text" id="loc-naam" required placeholder="bv. Zolder, Doos 3, Kast gang">
+      </label>
+      <label>Ligt in (optioneel)
+        <select id="loc-parent"><option value="">— Geen, dit is een hoofdruimte —</option></select>
+      </label>
+      <label>Notitie (optioneel)
+        <textarea id="loc-notitie" rows="2" placeholder="bv. Bovenste plank, achterin"></textarea>
+      </label>
+      <div class="modal-acties">
+        <button type="button" class="btn btn-ghost" data-close-modal>Annuleren</button>
+        <button type="submit" class="btn btn-accent">Opslaan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: item toevoegen/bewerken -->
+<div id="modal-item" class="modal-backdrop hidden">
+  <div class="modal modal-wide">
+    <h2 id="modal-item-titel">Nieuw voorwerp</h2>
+    <form id="form-item">
+      <div class="modal-grid">
+        <div class="modal-col-foto">
+          <label class="foto-label">Foto
+            <div class="foto-drop" id="foto-drop">
+              <img id="foto-preview" class="hidden" alt="Voorbeeld">
+              <span id="foto-placeholder">Klik om een foto te kiezen</span>
+            </div>
+            <input type="file" id="item-foto" accept="image/*" capture="environment" class="hidden">
+          </label>
+        </div>
+        <div class="modal-col-velden">
+          <label>Naam
+            <input type="text" id="item-naam" required placeholder="bv. Paspoort, Boormachine">
+          </label>
+          <label>Locatie
+            <select id="item-locatie" required></select>
+          </label>
+          <div class="veld-rij">
+            <label>Aantal
+              <input type="number" id="item-aantal" min="1" value="1" required>
+            </label>
+            <label>Vervaldatum (optioneel)
+              <input type="date" id="item-vervaldatum">
+            </label>
+          </div>
+          <label>Labels (komma-gescheiden)
+            <input type="text" id="item-tags" placeholder="bv. Gereedschap, Kamperen">
+          </label>
+        </div>
+      </div>
+      <div class="modal-acties">
+        <button type="button" class="btn btn-ghost" data-close-modal>Annuleren</button>
+        <button type="submit" class="btn btn-accent">Opslaan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: uitlenen -->
+<div id="modal-uitleen" class="modal-backdrop hidden">
+  <div class="modal">
+    <h2>Uitlenen</h2>
+    <form id="form-uitleen">
+      <label>Aan wie leen je dit uit?
+        <input type="text" id="uitleen-naam" required placeholder="bv. Jeroen">
+      </label>
+      <div class="modal-acties">
+        <button type="button" class="btn btn-ghost" data-close-modal>Annuleren</button>
+        <button type="submit" class="btn btn-accent">Registreren</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: QR scannen -->
+<div id="modal-scan" class="modal-backdrop hidden">
+  <div class="modal modal-wide">
+    <h2>QR-code scannen</h2>
+    <p class="hint">Richt de camera op de code die op een doos of plank is geplakt.</p>
+    <video id="scan-video" playsinline></video>
+    <canvas id="scan-canvas" class="hidden"></canvas>
+    <p id="scan-status" class="hint"></p>
+    <div class="modal-acties">
+      <button type="button" class="btn btn-ghost" data-close-modal id="btn-stop-scan">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: QR printen -->
+<div id="modal-qr" class="modal-backdrop hidden">
+  <div class="modal">
+    <h2>QR-code voor deze locatie</h2>
+    <div id="qr-canvas-wrap" class="qr-canvas-wrap"></div>
+    <p class="hint">Plak deze code op de doos of plank. Scannen opent direct de inhoud.</p>
+    <div class="modal-acties">
+      <button type="button" class="btn btn-ghost" data-close-modal>Sluiten</button>
+      <button type="button" class="btn btn-accent" id="btn-print-qr">Afdrukken</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/vendor/qrcode.js"></script>
+<script src="js/vendor/jsQR.js"></script>
+<script src="js/db.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
